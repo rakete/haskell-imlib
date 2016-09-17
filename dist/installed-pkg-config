@@ -1,0 +1,29 @@
+name: Imlib
+version: 0.1.1
+license: BSD3
+copyright:
+maintainer: cgibbard@gmail.com
+stability:
+homepage:
+package-url:
+description: Haskell binding for Imlib 2
+category: Graphics
+author: Cale Gibbard
+exposed: True
+exposed-modules: Graphics.Imlib
+hidden-modules:
+import-dirs: /home/lazor/.cabal/lib/Imlib-0.1.1/ghc-6.10.1
+library-dirs: /home/lazor/.cabal/lib/Imlib-0.1.1/ghc-6.10.1
+hs-libraries: HSImlib-0.1.1
+extra-libraries: Imlib2
+extra-ghci-libraries:
+include-dirs:
+includes:
+depends: X11-1.4.5 array-0.2.0.0 base-4.0.0.0
+hugs-options:
+cc-options:
+ld-options:
+framework-dirs:
+frameworks:
+haddock-interfaces: /home/lazor/.cabal/share/doc/Imlib-0.1.1/html/Imlib.haddock
+haddock-html: /home/lazor/.cabal/share/doc/Imlib-0.1.1/html
