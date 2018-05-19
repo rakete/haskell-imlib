@@ -336,12 +336,12 @@ contextSetColorCmya :: Int -> Int -> Int -> Int -> IO ()
 contextSetColorCmya c m y a = imlibContextSetColorCmya (fromIntegral c) (fromIntegral m) (fromIntegral y) (fromIntegral a)
 
 --void imlib_context_set_color_hsva(float hue, float saturation, float value, int alpha);
-foreign import ccall "static Imlib2.h imlib_context_set_color_hsva" imlibContextSetColorHsva :: CInt -> CInt -> CInt -> CInt -> IO ()
-contextSetColorHsva h s v a = imlibContextSetColorHsva (fromIntegral h) (fromIntegral s) (fromIntegral v) (fromIntegral a)
+foreign import ccall "static Imlib2.h imlib_context_set_color_hsva" imlibContextSetColorHsva :: CFloat -> CFloat -> CFloat -> CInt -> IO ()
+contextSetColorHsva h s v a = imlibContextSetColorHsva (fromIntegral h) s v (fromIntegral a)
 
 --void imlib_context_set_color_hlsa(float hue, float lightness, float saturation, int alpha);
-foreign import ccall "static Imlib2.h imlib_context_set_color_hlsa" imlibContextSetColorHlsa :: CInt -> CInt -> CInt -> CInt -> IO ()
-contextSetColorHlsa h l s a = imlibContextSetColorHlsa (fromIntegral h) (fromIntegral l) (fromIntegral s) (fromIntegral a)
+foreign import ccall "static Imlib2.h imlib_context_set_color_hlsa" imlibContextSetColorHlsa :: CInt -> CFloat -> CFloat -> CInt -> IO ()
+contextSetColorHlsa h l s a = imlibContextSetColorHlsa (fromIntegral h) l s (fromIntegral a)
 
 --void imlib_context_set_color_range(Imlib_Color_Range color_range);
 foreign import ccall "static Imlib2.h imlib_context_set_color_range" imlibContextSetColorRange :: ImlibColorRange -> IO ()
@@ -1111,24 +1111,30 @@ imageQueryPixelCmya cx cy = do
     return (cc,mm,yy,aa)
 
 --void imlib_image_query_pixel_hsva(int x, int y, float *hue, float *saturation, float *value, int *alpha);
-foreign import ccall "static Imlib2.h imlib_image_query_pixel_hsva" imlibImageQueryPixelHsva :: CInt -> CInt -> Ptr CInt -> Ptr CInt -> Ptr CInt -> Ptr CInt -> IO ()
-imageQueryPixelHsva :: Int -> Int -> IO (Int, Int, Int, Int)
+foreign import ccall "static Imlib2.h imlib_image_query_pixel_hsva" imlibImageQueryPixelHsva :: CInt -> CInt -> Ptr CFloat -> Ptr CFloat -> Ptr CFloat -> Ptr CInt -> IO ()
+imageQueryPixelHsva :: Int -> Int -> IO (Float, Float, Float, Int)
 imageQueryPixelHsva cx cy = do
-    [h,s,v,a] <- nmalloc 4
+    [h,s,v] <- nmalloc 3
+    [a] <- nmalloc 1
     imlibImageQueryPixelHsva (fromIntegral cx) (fromIntegral cy) h s v a
-    [hh,ss,vv,aa] <- liftM (map fromIntegral) $ mapM peek [h,s,v,a]
-    mapM free [h,s,v,a]
-    return (hh,ss,vv,aa)
+    [hh,ss,vv] <- mapM peek [h,s,v]
+    [aa] <- mapM peek [a]
+    mapM free [h,s,v]
+    mapM free [a]
+    return (realToFrac hh,realToFrac ss,realToFrac vv,fromIntegral aa)
 
 --void imlib_image_query_pixel_hlsa(int x, int y, float *hue, float *lightness, float *saturation, int *alpha);
-foreign import ccall "static Imlib2.h imlib_image_query_pixel_hlsa" imlibImageQueryPixelHlsa :: CInt -> CInt -> Ptr CInt -> Ptr CInt -> Ptr CInt -> Ptr CInt -> IO ()
-imageQueryPixelHlsa :: Int -> Int -> IO (Int, Int, Int, Int)
+foreign import ccall "static Imlib2.h imlib_image_query_pixel_hlsa" imlibImageQueryPixelHlsa :: CInt -> CInt -> Ptr CFloat -> Ptr CFloat -> Ptr CFloat -> Ptr CInt -> IO ()
+imageQueryPixelHlsa :: Int -> Int -> IO (Float, Float, Float, Int)
 imageQueryPixelHlsa cx cy = do
-    [h,l,s,a] <- nmalloc 4
+    [h,l,s] <- nmalloc 3
+    [a] <- nmalloc 1
     imlibImageQueryPixelHlsa (fromIntegral cx) (fromIntegral cy) h l s a
-    [hh,ll,ss,aa] <- liftM (map fromIntegral) $ mapM peek [h,l,s,a]
-    mapM free [h,l,s,a]
-    return (hh,ll,ss,aa)
+    [hh,ll,ss] <- mapM peek [h,l,s]
+    [aa] <- mapM peek [a]
+    mapM free [h,l,s]
+    mapM free [a]
+    return (realToFrac hh,realToFrac ll,realToFrac ss,fromIntegral aa)
 
 --void imlib_image_attach_data_value(const char *key, void *data, int value, Imlib_Data_Destructor_Function destructor_function);
 foreign import ccall "static Imlib2.h imlib_image_attach_data_value" imlibImageAttachDataValue :: CString -> Ptr () -> Int -> FunPtr ImlibDataDestructorFunction -> IO ()
